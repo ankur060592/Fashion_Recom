@@ -1,0 +1,9 @@
+
+train: C:/Work/GenAI/Fashion_Recom/train
+val: C:/Work/GenAI/Fashion_Recom/test
+
+# number of classes
+nc: 10
+
+# class names
+names: ['sunglass','hat','jacket','shirt','pants','shorts','skirt','dress','bag','shoe']
