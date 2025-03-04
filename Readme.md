@@ -113,3 +113,10 @@ Fashion_recom/
 - [LLaVA - Large Language and Vision Assistant](https://github.com/haotian-liu/LLaVA)
 - [LM Studio](https://lmstudio.ai/)
 
+## Next Steps
+
+- Train the model with more AI generated Images for better results
+- Try YOLO11 for better accuracy
+- Use Better AI model for correct AI recomendation
+- Conver Text to Image for REcomendation
+- Implement the Roast

@@ -1,0 +1,8 @@
+# Ignore all image files inside these directories
+output/detected_items/
+runs/detect/predict/
+temp/
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
