@@ -1,24 +1,26 @@
-# config.py
+import os
 
-# Input and output directories 
-ROOT_PATH = "C:/Work/GenAI/Fashion_Recom"
+# Automatically detect the root directory
+ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-#dataset path
-DATA_FOLDER = "C:/Work/GenAI/Fashion_Recom/data/colorful_fashion_dataset_for_object_detection"
-IMAGE_PATH = 'C:/Work/GenAI/Fashion_Recom/data/colorful_fashion_dataset_for_object_detection/JPEGImages/'
-ANNOTATION_PATH  = 'C:/Work/GenAI/Fashion_Recom/data/colorful_fashion_dataset_for_object_detection/Annotations_txt/'
+# Dataset paths (relative to ROOT_PATH)
+DATA_FOLDER = os.path.join(ROOT_PATH, "data", "colorful_fashion_dataset_for_object_detection")
+IMAGE_PATH = os.path.join(DATA_FOLDER, "JPEGImages")
+ANNOTATION_PATH = os.path.join(DATA_FOLDER, "Annotations_txt")
 
-#best saved Model
-SAVED_MODEL_PATH = "C:/Work/GenAI/Fashion_Recom/runs/detect/train4/weights/best.pt"
+# Best saved YOLO model
+SAVED_MODEL_PATH = os.path.join(ROOT_PATH, "runs", "detect", "train4", "weights", "best.pt")
 
-#YOLO output folder
-OUTPUT_FOLDER = "C:/Work/GenAI/Fashion_Recom/output/detected_items"
+# YOLO output folder
+OUTPUT_FOLDER = os.path.join(ROOT_PATH, "output", "detected_items")
 
 # LM Studio API Settings
 API_URL = "http://localhost:1234/v1/chat/completions"
 MODEL_NAME = "LLaVA-1.5-13B"
 
-TEST_IMAGE_PATH = "C:/Work/GenAI/Fashion_Recom/data/test_ai/6452.jpg"
+# Test image path (ensure the test_ai folder exists)
+TEST_IMAGE_PATH = os.path.join(ROOT_PATH, "data", "test_ai", "6452.jpg")
 
-# Change temp_path to a user-writable directory
-TEMP_PATH = "C:/Users/ankur_qyibdp/Documents/FashionRecomTemp"
+# Temp path (create a writable temp directory inside the project)
+TEMP_PATH = os.path.join(ROOT_PATH, "temp")
+os.makedirs(TEMP_PATH, exist_ok=True)  # Ensure the temp directory exists
