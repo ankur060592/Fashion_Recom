@@ -9,7 +9,7 @@ IMAGE_PATH = os.path.join(DATA_FOLDER, "JPEGImages")
 ANNOTATION_PATH = os.path.join(DATA_FOLDER, "Annotations_txt")
 
 # Best saved YOLO model
-SAVED_MODEL_PATH = os.path.join(ROOT_PATH, "runs", "detect", "train4", "weights", "best.pt")
+SAVED_MODEL_PATH = os.path.join(ROOT_PATH, "runs", "detect", "train5", "weights", "best.pt")
 
 # YOLO output folder
 OUTPUT_FOLDER = os.path.join(ROOT_PATH, "output", "detected_items")
@@ -18,9 +18,6 @@ OUTPUT_FOLDER = os.path.join(ROOT_PATH, "output", "detected_items")
 API_URL = "http://localhost:1234/v1/chat/completions"
 MODEL_NAME = "2vasabi_-_qwen2-vl-llava150k-lora"    #"LLaVA-1.5-13B"
 
-
-# Test image path (ensure the test_ai folder exists)
-TEST_IMAGE_PATH = os.path.join(ROOT_PATH, "data", "test_ai", "6452.jpg")
 
 # Temp path (create a writable temp directory inside the project)
 TEMP_PATH = os.path.join(ROOT_PATH, "temp")
