@@ -16,7 +16,8 @@ OUTPUT_FOLDER = os.path.join(ROOT_PATH, "output", "detected_items")
 
 # LM Studio API Settings
 API_URL = "http://localhost:1234/v1/chat/completions"
-MODEL_NAME = "LLaVA-1.5-13B"
+MODEL_NAME = "2vasabi_-_qwen2-vl-llava150k-lora"    #"LLaVA-1.5-13B"
+
 
 # Test image path (ensure the test_ai folder exists)
 TEST_IMAGE_PATH = os.path.join(ROOT_PATH, "data", "test_ai", "6452.jpg")
