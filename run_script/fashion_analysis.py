@@ -1,15 +1,21 @@
 import os
 import base64
-import requests
+from google import genai
+from dotenv import load_dotenv
 
-from config import API_URL, MODEL_NAME
+from config import GEMINI_MODEL_NAME
+
+# Load API key from environment variables
+load_dotenv()
+gemini_api_key = os.getenv("GEMINI_API_KEY")
+client = genai.Client(api_key=gemini_api_key)
+
 
 def analyze_outfit(image_path, detected_labels):
-    """Sends detected fashion items and outfit details to LLaVA for structured analysis."""
+    """Sends detected fashion items and outfit details to Gemini API for structured analysis."""
     with open(image_path, "rb") as img_file:
         base64_image = base64.b64encode(img_file.read()).decode("utf-8")
     
-    # Constructing structured input for better analysis
     detected_items_text = ", ".join(detected_labels)
     
     prompt = f"""
@@ -23,32 +29,30 @@ def analyze_outfit(image_path, detected_labels):
     **Output Structure:**
     1️⃣ **Outfit Breakdown & Color Analysis**
       - List each clothing item with its detected color and pattern.
+      - Identify the overall color scheme (neutral, bold, pastel, monochrome, contrasting).
       - Describe the fashion style (casual, business casual, vintage, high fashion, minimal, streetwear, etc.).
     
     2️⃣ **Style Insights & Harmony Check**
       - Evaluate color coordination (well-balanced, contrasting, mismatched).
       - Assess pattern harmony (clashing/matching, busy/minimalistic).
+      - Determine if the outfit is suitable for the occasion/season.
+      - Suggest minor improvements (e.g., layering, accessory choices).
     
     3️⃣ **Alternative Outfit Recommendation**
       - Suggest an improved version of the current outfit while maintaining its essence.
+      - Offer a seasonal or occasion-based alternative.
       - Recommend better color combinations.
+      - Suggest fabric/material changes (e.g., linen for summer, wool for winter).
       - Include accessory recommendations (shoes, belts, jewelry, bags).
     """
     
-    payload = {
-        "model": MODEL_NAME,
-        "messages": [
-            {"role": "system", "content": "You are a professional fashion stylist providing detailed outfit analysis and recommendations."},
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.7,
-        "max_tokens": 200,
-        "images": [base64_image]
-    }
-    
-    response = requests.post(API_URL, json=payload)
-    
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
-    else:
-        return "Error retrieving insights. Please try again."
+    response = client.models.generate_content(
+        model=GEMINI_MODEL_NAME, contents=[
+                {"role": "user", "parts": [
+                    {"text": prompt},
+                    {"inline_data": {"mime_type": "image/jpeg", "data": base64_image}}
+                ]}
+            ]
+    )
+        
+    return response.text if response else "Error retrieving insights. Please try again."

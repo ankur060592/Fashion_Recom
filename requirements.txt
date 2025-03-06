@@ -67,3 +67,5 @@ ultralytics==8.3.82
 ultralytics-thop==2.0.14
 urllib3==2.3.0
 watchdog==6.0.0
+google-genai
+python-dotenv
