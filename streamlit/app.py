@@ -1,19 +1,21 @@
-import sys
 import os
+import sys
+
 import streamlit as st
-import cv2
-# Ensure Python finds the 'run_script' directory
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from run_script.yolo_inference import detect_fashion_items
-from run_script.fashion_analysis import analyze_outfit
 from config import TEMP_PATH
+from run_script.fashion_analysis import analyze_outfit
+from run_script.yolo_inference import detect_fashion_items
 
 # Streamlit UI setup
 st.set_page_config(layout="wide", page_title="👗 AI Fashion Advisor", page_icon="👠")
 
 # Sidebar - Upload Image
 st.sidebar.title("📤 Upload Your Image")
-uploaded_file = st.sidebar.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+uploaded_file = st.sidebar.file_uploader(
+    "Choose an image...", type=["jpg", "jpeg", "png"]
+)
 image_path = None  # User must upload an image
 
 if uploaded_file:
@@ -24,7 +26,9 @@ if uploaded_file:
     st.sidebar.image(image_path, caption="Uploaded Image", use_container_width=True)
 
 # Layout: Two sections
-st.markdown("<h1 style='text-align: center;'>🎨 AI Fashion Analysis</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<h1 style='text-align: center;'>🎨 AI Fashion Analysis</h1>", unsafe_allow_html=True
+)
 col1, col2 = st.columns([1, 1])  # Equal width for better balance
 
 # Left Pane - Detection Output
@@ -33,8 +37,12 @@ with col1:
     detected_labels = []
     if image_path:
         output_image, detected_labels = detect_fashion_items(image_path)
-        st.image(output_image, caption="Detected Fashion Items", use_container_width=True)
-        st.markdown(f"**👗 Detected Look:** {', '.join(detected_labels)}", unsafe_allow_html=True)
+        st.image(
+            output_image, caption="Detected Fashion Items", use_container_width=True
+        )
+        st.markdown(
+            f"**👗 Detected Look:** {', '.join(detected_labels)}", unsafe_allow_html=True
+        )
 
 # Right Pane - Personas Selection
 with col2:
@@ -65,10 +73,16 @@ with col2:
     # AI Analysis Button
     if st.session_state.persona:
         with st.spinner("🧵 Analyzing Fashion... Please wait!"):
-            if st.session_state.persona in ["Dress the Occasion", "Ask Me Anything (Fashion Edition)"] and not user_input:
+            if (
+                st.session_state.persona
+                in ["Dress the Occasion", "Ask Me Anything (Fashion Edition)"]
+                and not user_input
+            ):
                 st.warning("⚠️ Please enter input for this persona.")
             else:
-                result = analyze_outfit(image_path, detected_labels, st.session_state.persona, user_input)
+                result = analyze_outfit(
+                    image_path, detected_labels, st.session_state.persona, user_input
+                )
                 st.success("✅ Analysis Complete!")
                 st.markdown("### AI Fashion Analysis 🎭")
                 st.write(result)
