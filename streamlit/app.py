@@ -39,30 +39,36 @@ with col1:
 # Right Pane - Personas Selection
 with col2:
     st.subheader("💡 Fashion AI Insights")
-    persona = None
-    user_input = ""
 
+    # Initialize session state for persona
+    if "persona" not in st.session_state:
+        st.session_state.persona = None
+
+    # Buttons to select persona
     col_btn1, col_btn2 = st.columns(2)
     if col_btn1.button("🔥 Style Roast/Compliment"):
-        persona = "Style Roast/Compliment"
+        st.session_state.persona = "Style Roast/Compliment"
     if col_btn2.button("✨ Complete the Look"):
-        persona = "Complete the Look"
+        st.session_state.persona = "Complete the Look"
     if col_btn1.button("🎭 Dress the Occasion"):
-        persona = "Dress the Occasion"
+        st.session_state.persona = "Dress the Occasion"
     if col_btn2.button("💬 Ask Me Anything"):
-        persona = "Ask Me Anything (Fashion Edition)"
-    
-    if persona == "Dress the Occasion":
+        st.session_state.persona = "Ask Me Anything (Fashion Edition)"
+
+    # Input fields appear based on selected persona
+    user_input = ""
+    if st.session_state.persona == "Dress the Occasion":
         user_input = st.text_input("🎭 Enter the Occasion:")
-    elif persona == "Ask Me Anything (Fashion Edition)":
+    elif st.session_state.persona == "Ask Me Anything (Fashion Edition)":
         user_input = st.text_area("💬 Ask your fashion-related question:")
 
-    if persona:
+    # AI Analysis Button
+    if st.session_state.persona:
         with st.spinner("🧵 Analyzing Fashion... Please wait!"):
-            if persona in ["Dress the Occasion", "Ask Me Anything (Fashion Edition)"] and not user_input:
+            if st.session_state.persona in ["Dress the Occasion", "Ask Me Anything (Fashion Edition)"] and not user_input:
                 st.warning("⚠️ Please enter input for this persona.")
             else:
-                result = analyze_outfit(image_path, detected_labels, persona, user_input)
+                result = analyze_outfit(image_path, detected_labels, st.session_state.persona, user_input)
                 st.success("✅ Analysis Complete!")
                 st.markdown("### AI Fashion Analysis 🎭")
                 st.write(result)
