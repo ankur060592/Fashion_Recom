@@ -1,11 +1,11 @@
 # AI Fashion Recommendation System
 
-This repository contains an AI-powered fashion recommendation system that detects and analyzes fashion items in images using **YOLOv8** and **LLaVA (Large Language and Vision Assistant)**. The project integrates **LM Studio** for Generative AI-based fashion recommendations and **Streamlit** for the user interface.
+This repository contains an AI-powered fashion recommendation system that detects and analyzes fashion items in images using **YOLOv11** and **Gemini API**. The project integrates **Streamlit** for the user interface.
 
 ## Features
 
-- Detects fashion items in images using **YOLOv8**.
-- Provides AI-powered fashion recommendations using **LLaVA v1.5 via LM Studio**.
+- Detects fashion items in images using **YOLOv11**.
+- Provides AI-powered fashion recommendations using **Gemini API**.
 - User-friendly **Streamlit UI** for interaction.
 - Supports **GPU and CPU-based** processing.
 
@@ -14,7 +14,7 @@ This repository contains an AI-powered fashion recommendation system that detect
 Ensure you have the following installed:
 
 - Python 3.10
-- CUDA (if using GPU for YOLOv8) - Optional
+- CUDA (if using GPU for YOLOv11) - Optional
 
 ## Installation
 
@@ -31,13 +31,6 @@ cd Fashion_recom
 pip install -r requirements.txt
 ```
 
-### Step 3: Install LM Studio
-
-1. Download and install **LM Studio** from [LM Studio's official site](https://lmstudio.ai/).
-2. Follow the instructions to set up an **API server** for local inference.
-3. Enable the API Server (Set it to http://localhost:1234).
-4. Ensure **LLaVA v1.5** is running in LM Studio.
-
 ## Running the Project
 
 ### 1. Prepare YOLO Dataset
@@ -52,15 +45,15 @@ Run the dataset preparation script (if required):
 python run_script/prepare_yolo_dataset.py
 ```
 
-### 2. Train & Run YOLOv8 Model
+### 2. Train & Run YOLOv11 Model
 
 #### **Using Pretrained Model**
-Since you have already trained YOLOv8, ensure your best model is available at:
+Since you have already trained YOLOv11, ensure your best model is available at:
 ```
-runs/detect/train4/weights/best.pt
+runs/detect/train5/weights/best.pt
 ```
 
-#### **(Optional) Train YOLOv8 from Scratch**
+#### **(Optional) Train YOLOv11 from Scratch**
 **With GPU:**
 ```bash
 python run_script/yolo_train.py
@@ -69,7 +62,7 @@ python run_script/yolo_train.py
 **Without GPU (CPU Mode):**
 Modify `yolo_train.py` to use CPU:
 ```python
-model = YOLO("yolov8n.pt")
+model = YOLO("yolo11n.pt")
 data_yml_path = os.path.join(ROOT_PATH, "data.yaml")
 model.train(data=data_yml_path, epochs=50, batch=8)
 ```
@@ -89,18 +82,20 @@ streamlit run streamlit/app.py
 ```
 Fashion_recom/
 │── streamlit/app.py  # Streamlit UI
-│── run_script/fashion_analysis.py  # YOLOv8 + LM Studio API logic
-│── config.py  # Configuration (dataset paths, YOLO model path, output folder, LM Studio API settings, test image path)
-│── output/  # Detected cropped images
+│── run_script/fashion_analysis.py  # Gemini API + Prompt
+│── run_script/yolo_inference.py  # YOLOv11
+│── config.py  # Configuration (dataset paths, YOLO model path, output folder, Gemini API settings, temp image path etc)
+│── output/  # Detected boxed images
 │── data/colorful_fashion_dataset_for_object_detection/JPEGImages/  # Input images
+│── env  # Gemini API key
 ```
 
 ## Project Flow
 
 1️⃣ **User uploads an image** via Streamlit UI.
-2️⃣ **YOLOv8 detects fashion items** (shirt, pants, hats, etc.).
-3️⃣ **Detected items are cropped and saved** in `output/`.
-4️⃣ **Each detected item is sent to Generative AI** (LLaVA/GPT-4 Vision via LM Studio) for analysis.
+2️⃣ **YOLOv11 detects fashion items** (shirt, pants, hats, etc.).
+3️⃣ **Detected items are boxed and saved** in `output/`.
+4️⃣ **Each detected item is sent to Generative AI** (Gemini API) for analysis.
 5️⃣ **AI provides fashion insights and recommendations**.
 6️⃣ **Streamlit displays results** (original image, boxed image, and AI-generated suggestions).
 
@@ -109,14 +104,13 @@ Fashion_recom/
 
 ## Acknowledgments
 
-- [YOLOv8 by Ultralytics](https://github.com/ultralytics/ultralytics)
-- [LLaVA - Large Language and Vision Assistant](https://github.com/haotian-liu/LLaVA)
-- [LM Studio](https://lmstudio.ai/)
+- [YOLOv11 by Ultralytics](https://github.com/ultralytics/ultralytics)
+- [Gemini API](https://ai.google.dev/)
 
 ## Next Steps
+- Consolidate all components into a single repository.  
+- Investigate the integration of Ujwal's referenced graph-based approach with the "Complete the Look" feature. If it proves unsuitable, consider adding a shopping feature using the Google API.  
+- Eliminate background noise from images to focus solely on the main subject, preferably utilizing the existing YOLO model.  
+- Improve the UI by incorporating design enhancements from previously shared references and updating the Streamlit interface.  
+- Optimize AI prompts to generate more accurate and insightful recommendations.  
 
-- Train the model with more AI generated Images for better results
-- Try YOLO11 for better accuracy
-- Use Better AI model for correct AI recomendation
-- Conver Text to Image for REcomendation
-- Implement the Roast

@@ -1,7 +1,8 @@
-import os
 import base64
-from google import genai
+import os
+
 from dotenv import load_dotenv
+from google import genai
 
 from config import GEMINI_MODEL_NAME
 
@@ -11,48 +12,65 @@ gemini_api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=gemini_api_key)
 
 
-def analyze_outfit(image_path, detected_labels):
-    """Sends detected fashion items and outfit details to Gemini API for structured analysis."""
+def analyze_fashion_style(detected_labels):
+    """
+    Generates either a style roast OR a compliment based on the detected fashion items.
+    """
+    STYLE_ROAST_PROMPT = """
+        You are a bold and witty fashion critic with a sharp eye for style. 
+        Your job is to analyze the given outfit and provide **either** a playful roast **or** a genuine compliment—**but not both**.
+        Be expressive, engaging, and humorous. 
+
+        ### Example Responses:
+        **Roast:**  
+        "Hmm… interesting choice. That oversized jacket makes you look like you borrowed it from an NBA player.
+        Maybe try a more fitted style for balance?"
+
+        **Compliment:**  
+        "Wow, this is a look! The way the leather jacket complements your edgy vibe is pure fire. Rock on!"
+
+        Now, **choose one**—either roast or compliment—and analyze the provided outfit details accordingly.
+        """
+
+    # Convert detected items into a descriptive format
+    outfit_description = (
+        ", ".join(detected_labels) if detected_labels else "A random casual outfit"
+    )
+
+    prompt = f"{STYLE_ROAST_PROMPT}\n\nOutfit Details: {outfit_description}"
+
+    return prompt
+
+
+def analyze_outfit(image_path, detected_labels, persona, user_input=None):
+    """Generate AI fashion insights based on selected persona."""
     with open(image_path, "rb") as img_file:
         base64_image = base64.b64encode(img_file.read()).decode("utf-8")
-    
-    detected_items_text = ", ".join(detected_labels)
-    
-    prompt = f"""
-    Analyze the provided outfit based on detected clothing items, colors, and patterns. Then, assess the overall style and recommend an alternative outfit for better coordination.
-    
-    **Detected Clothing Items:** {detected_items_text}
-    **Detected Colors:** Identify the dominant colors of each item.
-    **Detected Patterns (if any):** Identify patterns such as stripes, floral, polka dots.
-    **Occasion (if applicable):** Suggest if this outfit is suited for casual, formal, business, party, or seasonal wear.
-    
-    **Output Structure:**
-    1️⃣ **Outfit Breakdown & Color Analysis**
-      - List each clothing item with its detected color and pattern.
-      - Identify the overall color scheme (neutral, bold, pastel, monochrome, contrasting).
-      - Describe the fashion style (casual, business casual, vintage, high fashion, minimal, streetwear, etc.).
-    
-    2️⃣ **Style Insights & Harmony Check**
-      - Evaluate color coordination (well-balanced, contrasting, mismatched).
-      - Assess pattern harmony (clashing/matching, busy/minimalistic).
-      - Determine if the outfit is suitable for the occasion/season.
-      - Suggest minor improvements (e.g., layering, accessory choices).
-    
-    3️⃣ **Alternative Outfit Recommendation**
-      - Suggest an improved version of the current outfit while maintaining its essence.
-      - Offer a seasonal or occasion-based alternative.
-      - Recommend better color combinations.
-      - Suggest fabric/material changes (e.g., linen for summer, wool for winter).
-      - Include accessory recommendations (shoes, belts, jewelry, bags).
-    """
-    
+
+    if persona == "Style Roast/Compliment":
+        prompt = analyze_fashion_style(detected_labels)
+    elif persona == "Complete the Look":
+        prompt = f"""Okay, let's accessorize! Analyze the outfit and
+          suggest missing elements that would complete the look: {', '.join(detected_labels)}"""
+
+    elif persona == "Dress the Occasion":
+        if user_input:
+            prompt = f"""Given the occasion '{user_input}', suggest how the outfit fits and
+            what adjustments can be made: {', '.join(detected_labels)}"""
+        else:
+            return "Please enter an occasion to get recommendations."
+
+    elif persona == "Ask Me Anything (Fashion Edition)":
+        if user_input:
+            prompt = f"Fashion Q&A mode activated! Answer this question: {user_input}"
+        else:
+            return "Please enter your fashion-related question."
     response = client.models.generate_content(
-        model=GEMINI_MODEL_NAME, contents=[
-                {"role": "user", "parts": [
-                    {"text": prompt},
-                    {"inline_data": {"mime_type": "image/jpeg", "data": base64_image}}
-                ]}
-            ]
+        model=GEMINI_MODEL_NAME,
+        contents=[
+            {"inline_data": {"mime_type": "image/jpeg", "data": base64_image}},
+            {"text": prompt},
+        ],
     )
-        
-    return response.text if response else "Error retrieving insights. Please try again."
+
+    return response.text if response else "Couldn't generate a response. Try again!"
