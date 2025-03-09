@@ -1,6 +1,5 @@
 import base64
 import os
-import random
 
 from dotenv import load_dotenv
 from google import genai
@@ -13,40 +12,46 @@ gemini_api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=gemini_api_key)
 
 
+def analyze_fashion_style(detected_labels):
+    """
+    Generates a style roast or compliment based on the detected fashion items.
+    """
+    STYLE_ROAST_PROMPT = """
+        You are a bold and witty fashion critic with a sharp eye for style. 
+        Your job is to analyze the given outfit and provide either a mix of playful roasts or genuine compliments.
+        Be expressive, engaging, and humorous. 
+        Your response should reflect personality and make the user either laugh or feel flattered.
+
+        ### Example Responses:
+        **Roast:**  
+        "Hmm… interesting choice. That oversized jacket makes you look like you borrowed it from an NBA player.
+        Maybe try a more fitted style for balance?"
+
+        **Compliment:**  
+        "Wow, this is a look! The way the leather jacket complements your edgy vibe is pure fire. Rock on!"
+
+        Now, analyze the provided outfit details and respond in a similar style.
+        """
+
+    # Convert detected items into a descriptive format
+    outfit_description = ", ".join(detected_labels)
+
+    # Ensure we are passing an actual outfit description to Gemini
+    if not outfit_description:
+        outfit_description = "A random casual outfit"
+
+    prompt = f"{STYLE_ROAST_PROMPT}\n\nOutfit Details: {outfit_description}"
+
+    return prompt
+
+
 def analyze_outfit(image_path, detected_labels, persona, user_input=None):
     """Generate AI fashion insights based on selected persona."""
     with open(image_path, "rb") as img_file:
         base64_image = base64.b64encode(img_file.read()).decode("utf-8")
 
     if persona == "Style Roast/Compliment":
-        overall_feedback = [
-            """This outfit has potential, but the pieces don’t fully complement each other.
-              A little refinement could take it from good to great!""",
-            """You're making a statement with this look! But is it the statement you intended?
-              Some small tweaks could make it shine.""",
-            """It's bold, it's unique, and it definitely has personality! With a few adjustments,
-              this could be an iconic look.""",
-            """This is an interesting mix! A little fine-tuning could help everything
-             flow together seamlessly.""",
-        ]
-
-        suggestion_feedback = [
-            "Consider balancing the outfit by adjusting the contrast or streamlining some elements.",
-            "A minor change in layering or color coordination could enhance the overall aesthetic.",
-            "Accessories or a different texture could help bring out the best in this combination.",
-            "Think about the harmony of the pieces—sometimes, less is more!",
-        ]
-
-        overall_comment = random.choice(overall_feedback)
-        improvement_suggestion = random.choice(suggestion_feedback)
-
-        prompt = (
-            f"AI Fashion Analysis 🎭\n"
-            f"Here are my thoughts on this look:\n\n"
-            f"Overall Impression: {overall_comment}\n\n"
-            f"Suggestions:\n- {improvement_suggestion}\n\n"
-            f"With a few strategic adjustments, this outfit could go from 'almost there' to 'fashion-forward!'"
-        )
+        prompt = analyze_fashion_style(detected_labels)
     elif persona == "Complete the Look":
         prompt = f"""Okay, let's accessorize! Analyze the outfit and
           suggest missing elements that would complete the look: {', '.join(detected_labels)}"""
@@ -63,7 +68,6 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
             prompt = f"Fashion Q&A mode activated! Answer this question: {user_input}"
         else:
             return "Please enter your fashion-related question."
-    print(prompt)
     response = client.models.generate_content(
         model=GEMINI_MODEL_NAME,
         contents=[
