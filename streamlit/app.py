@@ -2,6 +2,7 @@ import os
 import sys
 
 import streamlit as st
+from PIL import Image
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config import TEMP_PATH
@@ -12,11 +13,27 @@ from run_script.yolo_inference import detect_fashion_items
 st.set_page_config(layout="wide", page_title="👗 AI Fashion Advisor", page_icon="👠")
 
 # Sidebar - Upload Image
-st.sidebar.title("📤 Upload Your Image")
+
+ta_logo = Image.open("assets/tiger_logo.jpeg")
+ta_logo.resize((300,300))
+google_next_logo = Image.open("assets/google_next_logo_2.png")
+gcp_logo = Image.open("assets/gcp_logo.webp")
+gemini_logo = Image.open("assets/gemini_logo.png")
+
+st.sidebar.image(ta_logo)
+st.sidebar.markdown("#")
+st.sidebar.markdown("Get personalized fashion recommendations using the power of Generative AI.")
+st.sidebar.markdown("#")
+st.sidebar.markdown("📤 Upload Your Image")
 uploaded_file = st.sidebar.file_uploader(
     "Choose an image...", type=["jpg", "jpeg", "png"]
 )
 image_path = None  # User must upload an image
+st.sidebar.markdown("#")
+st.sidebar.header("Developed for")
+st.sidebar.image(google_next_logo, use_container_width=True)
+st.sidebar.header("Powered by")
+st.sidebar.image([gcp_logo.resize((75,75)), gemini_logo.resize((150,75))])
 
 if uploaded_file:
     os.makedirs(TEMP_PATH, exist_ok=True)
