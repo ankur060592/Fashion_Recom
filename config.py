@@ -27,3 +27,4 @@ GEMINI_MODEL_NAME = "gemini-2.0-flash"
 # Temp path (create a writable temp directory inside the project)
 TEMP_PATH = os.path.join(ROOT_PATH, "temp")
 os.makedirs(TEMP_PATH, exist_ok=True)  # Ensure the temp directory exists
+ASSEST_PATH = os.path.join(ROOT_PATH, "streamlit", "assets")
