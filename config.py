@@ -15,6 +15,11 @@ SAVED_MODEL_PATH = os.path.join(
     ROOT_PATH, "runs", "detect", "train5", "weights", "best.pt"
 )
 
+# Best saved YOLO model
+FASHION_SAVED_MODEL_PATH = os.path.join(
+    ROOT_PATH, "runs", "detect", "train7", "weights", "best.pt"
+)
+
 # YOLO output folder
 OUTPUT_FOLDER = os.path.join(ROOT_PATH, "output", "detected_items")
 
