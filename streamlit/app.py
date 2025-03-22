@@ -138,8 +138,7 @@ def display_detected_outfit(image_path):
 
 
 def main():
-    st.set_page_config(layout="wide", page_title="👗 AI Fashion Advisor", page_icon="👠")
-
+    st.set_page_config(layout="wide", page_title="TA Fashion Lens AI", page_icon="👠")
     ta_logo = Image.open(os.path.join(ASSEST_PATH, "tiger_logo.jpg"))
     google_next_logo = Image.open(os.path.join(ASSEST_PATH, "google_next_logo_2.png"))
     gcp_logo = Image.open(os.path.join(ASSEST_PATH, "gcp_logo.webp"))
@@ -171,7 +170,7 @@ def main():
         st.image([gcp_logo.resize((75, 75)), gemini_logo.resize((200, 75))])
 
     st.markdown(
-        "<h1 style='text-align: center;'>🎨 AI Fashion Analysis</h1>",
+        "<h1 style='text-align: center;'>👗 TA Fashion Lens AI</h1>",
         unsafe_allow_html=True,
     )
     col1, col2 = st.columns([1, 1])
