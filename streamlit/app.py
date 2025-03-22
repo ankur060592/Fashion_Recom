@@ -35,11 +35,8 @@ def start_webcam_mode():
         # Process the frame with YOLO detection
         detected, frame_with_boxes, detected_labels = process_frame(frame)
 
-        # Resize the frame to match the Upload Image display size
-        frame_with_boxes_resized = cv2.resize(frame_with_boxes, (400, 300))
-
-        # Display live webcam feed with YOLO detection
-        stframe.image(frame_with_boxes_resized, channels="BGR", width=400)
+        # Display the live webcam feed (resize only for display purposes)
+        stframe.image(frame_with_boxes, channels="BGR", use_container_width=True)
 
         # Update consecutive detection count
         consecutive_detection_count = update_consecutive(
@@ -48,15 +45,18 @@ def start_webcam_mode():
 
         # Check if detection is stable for a few frames (e.g., 5 consecutive frames)
         if consecutive_detection_count >= 5 and detected_labels:
-            # Save the best frame as an image for AI analysis
+            # Save the original frame with boxes (not resized)
             best_frame_path = os.path.join(TEMP_PATH, "best_frame.jpg")
-            cv2.imwrite(best_frame_path, frame)
+            cv2.imwrite(
+                best_frame_path, frame_with_boxes
+            )  # Save frame_with_boxes instead of resized version
 
             # Store the detected labels and best frame path
             st.session_state.best_frame_captured = True
             st.session_state.detected_labels = list(detected_labels)
             st.session_state.image_path = best_frame_path
-
+            # Clear the live webcam feed display
+            stframe.empty()
             break
 
     cap.release()
@@ -109,7 +109,9 @@ def display_detected_outfit(image_path):
     if st.session_state.input_mode == "Upload Image":
         if st.session_state.image_path:
             output_image, detected_labels = detect_fashion_items(image_path)
-            st.image(output_image, caption="Detected Fashion Items", width=400)
+            st.image(
+                output_image, caption="Detected Fashion Items", use_container_width=True
+            )
             st.markdown(
                 f"**👗 Detected Look:** {', '.join(detected_labels)}",
                 unsafe_allow_html=True,
@@ -124,7 +126,9 @@ def display_detected_outfit(image_path):
             start_webcam_mode()
         if st.session_state.best_frame_captured and "image_path" in st.session_state:
             st.image(
-                st.session_state.image_path, caption="Detected Fashion Items", width=300
+                st.session_state.image_path,
+                caption="Detected Fashion Items",
+                use_container_width=True,
             )
             st.markdown(
                 f"**👗 Detected Look:** {', '.join(st.session_state.detected_labels)}",
