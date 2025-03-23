@@ -9,6 +9,9 @@ This repository contains an AI-powered fashion recommendation system that detect
 - User-friendly **Streamlit UI** for interaction.
 - Supports **GPU and CPU-based** processing.
 
+## Result
+![TA Fashion Lens AI]C:\Work\GenAI\Fashion_Recom\streamlit\result_sample\UI_sample.gif
+
 ## Prerequisites
 
 Ensure you have the following installed:
