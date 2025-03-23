@@ -10,7 +10,7 @@ This repository contains an AI-powered fashion recommendation system that detect
 - Supports **GPU and CPU-based** processing.
 
 ## Result
-![TA Fashion Lens AI]C:\Work\GenAI\Fashion_Recom\streamlit\result_sample\UI_sample.gif
+![TA Fashion Lens AI] https://github.com/ankur060592/Fashion_Recom/blob/update_readme/streamlit/result_sample/UI_sample.gif
 
 ## Prerequisites
 
