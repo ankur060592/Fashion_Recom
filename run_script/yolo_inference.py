@@ -5,13 +5,13 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
-from config import OUTPUT_FOLDER, SAVED_MODEL_PATH
+from config import FASHION_SAVED_MODEL_PATH, OUTPUT_FOLDER
 
 # Ensure Python finds 'run_script'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Load trained YOLO model
-model = YOLO(SAVED_MODEL_PATH)
+model = YOLO(FASHION_SAVED_MODEL_PATH)
 
 
 def detect_fashion_items(input_data):

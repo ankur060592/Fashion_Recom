@@ -64,6 +64,7 @@ Modify `yolo_train.py` to use CPU:
 ```python
 model = YOLO("yolo11n.pt")
 data_yml_path = os.path.join(ROOT_PATH, "data.yaml")
+#### **(Optional) For better training fashion_data.yaml()
 model.train(data=data_yml_path, epochs=50, batch=8)
 ```
 Then, run:
@@ -101,6 +102,7 @@ Fashion_recom/
 
 ## Dataset Used
 - [Colorful Fashion Dataset for Object Detection (Kaggle)](https://www.kaggle.com/datasets)
+- [FashionPedia Fashion Dataset for Object Detection (Kaggle)](https://www.kaggle.com/datasets)
 
 ## Acknowledgments
 
