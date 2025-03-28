@@ -114,7 +114,10 @@ def display_detected_outfit(image_path):
         if st.session_state.image_path:
             output_image, detected_labels = detect_fashion_items(image_path)
             st.image(
-                output_image, caption="Detected Fashion Items", use_container_width=True
+                output_image,
+                caption="Detected Fashion Items",
+                use_container_width=False,
+                width=400,
             )
             st.markdown(
                 f"**👗 Detected Look:** {', '.join(detected_labels)}",
@@ -132,7 +135,8 @@ def display_detected_outfit(image_path):
             st.image(
                 st.session_state.image_path,
                 caption="Detected Fashion Items",
-                use_container_width=True,
+                use_container_width=False,
+                width=400,
             )
             st.markdown(
                 f"**👗 Detected Look:** {', '.join(st.session_state.detected_labels)}",
