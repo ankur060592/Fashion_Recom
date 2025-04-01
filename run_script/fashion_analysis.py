@@ -51,12 +51,11 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
     with open(image_path, "rb") as img_file:
         base64_image = base64.b64encode(img_file.read()).decode("utf-8")
 
-    # Extract only the label names, ignoring bounding box data
-    print("Detected Labels:", detected_labels)
     if not detected_labels:
         return "No fashion items detected. Please try again with a clearer image."
+
     outfit_description = (
-        " ".join(detected_labels) if detected_labels else "A random casual outfit"
+        ", ".join(detected_labels) if detected_labels else "A random casual outfit"
     )
 
     common_prompt = generate_common_prompt()
@@ -103,8 +102,6 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
             """
         else:
             return "Please enter your fashion-related question."
-
-    print("Prompt for Gemini:", prompt)
     try:
         response = client.models.generate_content(
             model=GEMINI_MODEL_NAME,
@@ -113,7 +110,6 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
                 {"text": prompt},
             ],
         )
-        print("Response from Gemini:", response)
         return response.text if response else "Couldn't generate a response. Try again!"
     except Exception as e:
         return f"An error occurred: {e}"
