@@ -6,6 +6,8 @@ from PIL import Image
 import streamlit as st
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import time
+
 import cv2
 
 from config import ASSEST_PATH, TEMP_PATH
@@ -24,6 +26,8 @@ def start_webcam_mode():
     )
     cap = cv2.VideoCapture(0)
     consecutive_detection_count = 0
+    detection_wait_time = 5  # Number of seconds to wait for stable detection
+    start_time = time.time()
 
     stframe = st.empty()  # For displaying the live webcam feed
 
@@ -43,8 +47,8 @@ def start_webcam_mode():
             detected, consecutive_detection_count
         )
 
-        # Check if detection is stable for a few frames (e.g., 5 consecutive frames)
-        if consecutive_detection_count >= 5 and detected_labels:
+        # Check if detection is stable for a few seconds
+        if (time.time() - start_time >= detection_wait_time) and detected_labels:
             # Save the original frame with boxes (not resized)
             best_frame_path = os.path.join(TEMP_PATH, "best_frame.jpg")
             cv2.imwrite(
@@ -110,7 +114,10 @@ def display_detected_outfit(image_path):
         if st.session_state.image_path:
             output_image, detected_labels = detect_fashion_items(image_path)
             st.image(
-                output_image, caption="Detected Fashion Items", use_container_width=True
+                output_image,
+                caption="Detected Fashion Items",
+                use_container_width=False,
+                width=400,
             )
             st.markdown(
                 f"**👗 Detected Look:** {', '.join(detected_labels)}",
@@ -128,7 +135,8 @@ def display_detected_outfit(image_path):
             st.image(
                 st.session_state.image_path,
                 caption="Detected Fashion Items",
-                use_container_width=True,
+                use_container_width=False,
+                width=400,
             )
             st.markdown(
                 f"**👗 Detected Look:** {', '.join(st.session_state.detected_labels)}",
@@ -144,8 +152,34 @@ def main():
     gcp_logo = Image.open(os.path.join(ASSEST_PATH, "gcp_logo.webp"))
     gemini_logo = Image.open(os.path.join(ASSEST_PATH, "gemini_logo.png"))
 
+    # Initialize session state variables
     if "input_mode" not in st.session_state:
         st.session_state.input_mode = "Upload Image"
+    if "image_path" not in st.session_state:
+        st.session_state.image_path = None
+    if "best_frame_captured" not in st.session_state:
+        st.session_state.best_frame_captured = False
+    if "detected_labels" not in st.session_state:
+        st.session_state.detected_labels = []
+    if "ai_analysis_output" not in st.session_state:
+        st.session_state.ai_analysis_output = ""
+    if "persona" not in st.session_state:
+        st.session_state.persona = None
+    if "user_input" not in st.session_state:
+        st.session_state.user_input = ""
+
+    # Reset relevant session state variables when input mode changes or a new image is uploaded
+    if st.session_state.input_mode != st.session_state.get(
+        "previous_input_mode", None
+    ) or (
+        st.session_state.input_mode == "Upload Image" and st.session_state.image_path
+    ):
+        st.session_state.persona = None
+        st.session_state.user_input = ""
+        st.session_state.ai_analysis_output = ""
+
+    # Update the previous input mode
+    st.session_state.previous_input_mode = st.session_state.input_mode
 
     with st.sidebar:
         st.image(ta_logo.resize((300, 100)))
@@ -175,17 +209,17 @@ def main():
     )
     col1, col2 = st.columns([1, 1])
 
-    if (
-        st.session_state.input_mode == "Upload Image"
-        and "image_path" in st.session_state
-    ):
+    if st.session_state.input_mode == "Upload Image" and st.session_state.image_path:
         with col1:
             detected_labels = display_detected_outfit(st.session_state.image_path)
         with col2:
             persona, user_input = persona_buttons()
-            if detected_labels:
+            if detected_labels and st.session_state.persona:
                 display_ai_analysis(
-                    st.session_state.image_path, detected_labels, persona, user_input
+                    st.session_state.image_path,
+                    detected_labels,
+                    st.session_state.persona,
+                    user_input,
                 )
 
     elif st.session_state.input_mode == "Live Webcam":
@@ -193,9 +227,12 @@ def main():
             detected_labels = display_detected_outfit(None)
         with col2:
             persona, user_input = persona_buttons()
-            if detected_labels:
+            if detected_labels and st.session_state.persona:
                 display_ai_analysis(
-                    st.session_state.image_path, detected_labels, persona, user_input
+                    st.session_state.image_path,
+                    detected_labels,
+                    st.session_state.persona,
+                    user_input,
                 )
 
 

@@ -23,9 +23,7 @@ FASHION_SAVED_MODEL_PATH = os.path.join(
 # YOLO output folder
 OUTPUT_FOLDER = os.path.join(ROOT_PATH, "output", "detected_items")
 
-# LM Studio API Settings
-API_URL = "http://localhost:1234/v1/chat/completions"
-MODEL_NAME = "2vasabi_-_qwen2-vl-llava150k-lora"  # "LLaVA-1.5-13B"
+# Gemini model name
 GEMINI_MODEL_NAME = "gemini-2.0-flash"
 
 

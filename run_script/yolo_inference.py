@@ -15,7 +15,7 @@ model = YOLO(FASHION_SAVED_MODEL_PATH)
 
 
 def detect_fashion_items(input_data):
-    """Detects fashion items from either image path or video frame, draws bounding boxes, and returns labels."""
+    """Detects fashion items from either image path or video frame, draws bounding boxes, and returns unique labels."""
     os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
     if isinstance(input_data, str):  # Case 1: Image Path
@@ -27,7 +27,7 @@ def detect_fashion_items(input_data):
 
     # Run YOLO inference
     results = model(image, conf=0.4)
-    detected_labels = []
+    detected_labels = set()  # Use a set to store unique labels
 
     for box in results[0].boxes:
         x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -39,17 +39,17 @@ def detect_fashion_items(input_data):
         cv2.putText(
             image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
         )
-        detected_labels.append(label)
+        detected_labels.add(label)  # Add label to the set
 
     # Save the updated image if it's a numpy array (Webcam frame)
     if isinstance(input_data, np.ndarray):
         unified_image_path = os.path.join(OUTPUT_FOLDER, "outfit_combined.jpg")
         cv2.imwrite(unified_image_path, image)
-        return unified_image_path, detected_labels
+        return unified_image_path, list(detected_labels)
 
     # If it's an image path, return detected labels only
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    return image, detected_labels
+    return image, list(detected_labels)
 
 
 def process_frame(frame):

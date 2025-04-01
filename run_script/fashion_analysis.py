@@ -19,7 +19,7 @@ def analyze_fashion_style(detected_labels):
     STYLE_ROAST_PROMPT = """
         You are a bold and witty fashion critic with a sharp eye for style. 
         Your job is to analyze the given outfit and provide **either** a playful roast **or** a genuine compliment—**but not both**.
-        Be expressive, engaging, and humorous. 
+        Be expressive, engaging, and humorous. Keep it concise and actionable.
 
         ### Example Responses:
         **Roast:**  
@@ -47,16 +47,19 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
     with open(image_path, "rb") as img_file:
         base64_image = base64.b64encode(img_file.read()).decode("utf-8")
 
+    # Filter out any labels that might contain bounding box details
+    filtered_labels = [label for label in detected_labels if "box" not in label.lower()]
+
     if persona == "Style Roast/Compliment":
-        prompt = analyze_fashion_style(detected_labels)
+        prompt = analyze_fashion_style(filtered_labels)
     elif persona == "Complete the Look":
-        prompt = f"""Okay, let's accessorize! Analyze the outfit and
-          suggest missing elements that would complete the look: {', '.join(detected_labels)}"""
+        prompt = f"""Analyze the outfit and suggest one or two missing elements that would complete the look.
+          Keep it concise and actionable: {', '.join(filtered_labels)}"""
 
     elif persona == "Dress the Occasion":
         if user_input:
             prompt = f"""Given the occasion '{user_input}', suggest how the outfit fits and
-            what adjustments can be made: {', '.join(detected_labels)}"""
+            what adjustments can be made: {', '.join(filtered_labels)}"""
         else:
             return "Please enter an occasion to get recommendations."
 
@@ -65,6 +68,7 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
             prompt = f"Fashion Q&A mode activated! Answer this question: {user_input}"
         else:
             return "Please enter your fashion-related question."
+
     response = client.models.generate_content(
         model=GEMINI_MODEL_NAME,
         contents=[
