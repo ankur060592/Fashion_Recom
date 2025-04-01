@@ -14,28 +14,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 model = YOLO(FASHION_SAVED_MODEL_PATH)
 
 
-def map_to_correct_label(labels):
-    """Map similar labels to the most correct one."""
-    label_priority = {
-        "top": ["t-shirt", "sweatshirt", "shirt"],
-        "jacket": ["coat"],
-        "sleeve": ["sleeve"],
-    }
-
-    final_labels = set()
-    for label in labels:
-        found = False
-        for correct_label, similar_labels in label_priority.items():
-            if label in similar_labels:
-                final_labels.add(correct_label)
-                found = True
-                break
-        if not found:
-            final_labels.add(label)
-
-    return list(final_labels)
-
-
 def detect_fashion_items(input_data):
     """Detects fashion items from either image path or video frame, draws bounding boxes, and returns unique labels."""
     os.makedirs(OUTPUT_FOLDER, exist_ok=True)
@@ -71,7 +49,6 @@ def detect_fashion_items(input_data):
 
     # If it's an image path, return detected labels only
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    detected_labels = map_to_correct_label(detected_labels)
     return image, list(detected_labels)
 
 
@@ -111,7 +88,6 @@ def process_frame(frame):
                 )
                 # Add label to set of detected labels
                 detected_labels.add(label)
-    detected_labels = map_to_correct_label(detected_labels)
     return label_detected_flag, frame, detected_labels
 
 
