@@ -95,11 +95,14 @@ def persona_buttons():
 def display_ai_analysis(image_path, detected_labels, persona, user_input):
     if persona:
         with st.spinner("🧵 Analyzing Fashion... Please wait!"):
-            if (
-                persona in ["Dress the Occasion", "Ask Me Anything (Fashion Edition)"]
-                and not user_input
-            ):
-                st.warning("⚠️ Please enter input for this persona.")
+            if persona == "Dress the Occasion" and not user_input:
+                st.warning(
+                    "⚠️ Please enter an occasion (e.g., 'Office Meeting', 'Casual Outing', 'Formal Dinner',)."
+                )
+                return
+            elif persona == "Ask Me Anything (Fashion Edition)" and not user_input:
+                st.warning("⚠️ Please enter a fashion-related question.")
+                return
             else:
                 result = analyze_outfit(
                     image_path, detected_labels, persona, user_input
@@ -123,9 +126,11 @@ def display_detected_outfit(image_path):
                 f"**👗 Detected Look:** {', '.join(detected_labels)}",
                 unsafe_allow_html=True,
             )
+            # Store detected labels in session state
+            st.session_state.detected_labels = detected_labels
             return detected_labels
     elif st.session_state.input_mode == "Live Webcam":
-        st.sidebar.empty()  # Clear the sidebar
+        st.sidebar.empty()
         if (
             "best_frame_captured" not in st.session_state
             or not st.session_state.best_frame_captured
@@ -174,15 +179,29 @@ def main():
     ) or (
         st.session_state.input_mode == "Upload Image" and st.session_state.image_path
     ):
-        st.session_state.persona = None
-        st.session_state.user_input = ""
-        st.session_state.ai_analysis_output = ""
+        if "persona" not in st.session_state or not st.session_state.persona:
+            st.session_state.persona = (
+                None  # Keep existing persona instead of resetting every time
+            )
+            st.session_state.user_input = st.session_state.get("user_input", "")
+            st.session_state.ai_analysis_output = ""
 
     # Update the previous input mode
     st.session_state.previous_input_mode = st.session_state.input_mode
 
+    # Custom CSS to control the sidebar width
+    st.markdown(
+        """
+        <style>
+        .css-1d391kg {max-width: 250px; padding-top: 20px;}
+        .css-1lcbmhc {max-width: 250px;}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     with st.sidebar:
-        st.image(ta_logo.resize((300, 100)))
+        st.image(ta_logo.resize((250, 80)))
         st.radio("Select Input Mode", ("Upload Image", "Live Webcam"), key="input_mode")
 
         if st.session_state.input_mode == "Upload Image":
@@ -214,11 +233,11 @@ def main():
             detected_labels = display_detected_outfit(st.session_state.image_path)
         with col2:
             persona, user_input = persona_buttons()
-            if detected_labels and st.session_state.persona:
+            if detected_labels and persona:
                 display_ai_analysis(
                     st.session_state.image_path,
                     detected_labels,
-                    st.session_state.persona,
+                    persona,
                     user_input,
                 )
 
