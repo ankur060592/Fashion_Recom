@@ -60,11 +60,29 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
 
     common_prompt = generate_common_prompt()
 
-    if persona == "Style Roast/Compliment":
-        prompt = analyze_fashion_style(outfit_description)
+    if persona == "Roast":
+        prompt = f""" {common_prompt} \n\n
+            Your job is to analyze the given outfit and provide a playful roast.
+            Be expressive, engaging, and humorous. Keep it concise and actionable.
+
+            **Example Roast:**
+            "Hmm… interesting choice. That oversized jacket makes you look like you borrowed it from an NBA player.
+            Maybe try a more fitted style for balance?"
+            Outfit Details: {outfit_description}
+    """
+    elif persona == "Compliment":
+        prompt = f""" {common_prompt} \n\n
+            Your job is to analyze the given outfit and provide a genuine compliment.
+            Be expressive, engaging, and positive. Keep it concise and actionable.
+
+            **Example Compliment:**
+            "Wow, this is a look! The way the leather jacket complements your edgy vibe is pure fire. Rock on!"
+
+            Outfit Details: {outfit_description}
+    """
     elif persona == "Complete the Look":
         prompt = f"""
-        {common_prompt}
+        {common_prompt} \n\n
         Suggest **one or two additional fashion elements** that would enhance the look.
         Ensure the suggestions are relevant to the **style, dressing sense, and visible accessories**.
 
@@ -78,7 +96,7 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
     elif persona == "Dress the Occasion":
         if user_input:
             prompt = f"""
-            {common_prompt}
+            {common_prompt} \n\n
             Given the occasion: '{user_input}', explain how the outfit fits and what adjustments can be made.
 
             **Example Response:**
@@ -94,7 +112,7 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
     elif persona == "Ask Me Anything (Fashion Edition)":
         if user_input:
             prompt = f"""
-            {common_prompt}
+            {common_prompt} \n\n
             Fashion Q&A mode activated! Answer this question: {user_input}
             Keep it concise in **two to three lines** and actionable.
 
