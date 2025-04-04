@@ -8,8 +8,10 @@ import streamlit as st
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import time
+from threading import Thread
 
 import cv2
+from gtts import gTTS
 
 from config import ASSEST_PATH, TEMP_PATH
 from run_script.fashion_analysis import analyze_outfit
@@ -68,88 +70,98 @@ def start_webcam_mode():
     cv2.destroyAllWindows()
 
 
-def custom_button(icon_path, label, key):
-    icon_base64 = get_image_base64(icon_path)
-    button_html = f"""
-    <style>
-        .custom-button {{
-            display: flex;
-            align-items: center;
-            background-color: #444;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            border: none;
-            width: 100%;
-        }}
-        .custom-button:hover {{
-            background-color: #666;
-        }}
-        .custom-button img {{
-            height: 25px;
-            margin-right: 8px;
-        }}
-    </style>
-    <button class="custom-button" onclick="document.getElementById('{key}_hidden').click()">
-        <img src="data:image/png;base64,{icon_base64}" />
-        {label}
-    </button>
-    <input type="hidden" id="{key}_hidden" />
-    """
-
-    st.markdown(button_html, unsafe_allow_html=True)
-
-    # This ensures the button click is captured
-    if st.button(label, key=f"btn_{key}"):
-        st.session_state.persona = key
-
-
 def persona_buttons():
     st.subheader("💡 Fashion AI Insights")
 
     if "persona" not in st.session_state:
         st.session_state.persona = None
 
-    # Load custom icons
-    fire_icon_path = os.path.join(ASSEST_PATH, "fire_icon.png")
-    chat_icon_path = os.path.join(ASSEST_PATH, "chat_icon.png")
-    cloth_icon_path = os.path.join(ASSEST_PATH, "clothes.png")
-    speach_icon_path = os.path.join(ASSEST_PATH, "speach.png")
-    speach2_icon_path = os.path.join(ASSEST_PATH, "speach.png")
+    # CSS for fixed-size buttons
+    st.markdown(
+        """
+        <style>
+        .fixed-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 150px; /* Fixed width for buttons */
+            height: 50px; /* Fixed height for buttons */
+            font-size: 16px;
+            border-radius: 8px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .fixed-button:hover {
+            background-color: #666;
+        }
+        .wider-button {
+            width: 300px; /* Wider width for the last row */
+        }
+        </style>
+    """,
+        unsafe_allow_html=True,
+    )
 
-    # Create columns for the buttons
-    col1, col2, col3 = st.columns(3)
-    col4, col5 = st.columns(2)
+    # Create columns for the buttons in three rows
+    col1, col2 = st.columns(2)  # First row with 2 columns
+    col3, col4 = st.columns(2)  # Second row with 2 columns
+    col5 = st.columns(1)[0]  # Third row with 1 wider column
 
-    # First row: Roast, Compliment, and Complete the Look
+    # First row: Roast, Compliment
     with col1:
-        custom_button(fire_icon_path, "Roast Me", "Roast")
+        if st.button(
+            "🔥 Roast Me",
+            key="Roast",
+            help="Get a fashion roast!",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Roast"
 
     with col2:
-        custom_button(chat_icon_path, "Give Me a Compliment", "Compliment")
+        if st.button(
+            "💬 Compliment",
+            key="Compliment",
+            help="Receive a compliment!",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Compliment"
 
+    # Second row: Complete the Look, Dress for an Occasion
     with col3:
-        custom_button(speach_icon_path, "Complete the Look", "Complete the Look")
+        if st.button(
+            "✨ Complete the Look",
+            key="Complete the Look",
+            help="Complete your outfit!",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Complete the Look"
 
     with col4:
-        custom_button(cloth_icon_path, "Dress for an Occasion", "Dress the Occasion")
+        if st.button(
+            "👔 Dress me for an Occasion",
+            key="Dress the Occasion",
+            help="Dress for any occasion!",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Dress the Occasion"
 
+    # Third row: Wider button for Ask Me Anything
     with col5:
-        custom_button(
-            speach2_icon_path,
-            "Ask Me Anything (Fashion Edition)",
-            "Ask Me Anything (Fashion Edition)",
-        )
+        if st.button(
+            "❓ Ask Me Anything",
+            key="Ask Me Anything",
+            help="Ask anything fashion-related!",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Ask Me Anything"
 
     user_input = ""
     if st.session_state.persona == "Dress the Occasion":
         user_input = st.text_input("🎭 Enter the Occasion:")
-    elif st.session_state.persona == "Ask Me Anything (Fashion Edition)":
+    elif st.session_state.persona == "Ask Me Anything":
         user_input = st.text_area("💬 Ask your fashion-related question:")
 
     return st.session_state.persona, user_input
@@ -160,24 +172,51 @@ def get_image_base64(image_path):
         return base64.b64encode(img_file.read()).decode("utf-8")
 
 
+def text_to_speech(text, lang="en", slow=False):
+    tts = gTTS(text=text, lang=lang, slow=slow)
+    audio_path = os.path.join(TEMP_PATH, "response.mp3")
+    tts.save(audio_path)
+    return audio_path
+
+
 def display_ai_analysis(image_path, detected_labels, persona, user_input):
+    prompt = ""
+    audio_path = None
+
     if persona:
         with st.spinner("🧵 Analyzing Fashion... Please wait!"):
             if persona == "Dress for an Occasion" and not user_input:
                 st.warning(
-                    "⚠️ Please enter an occasion (e.g., 'Office Meeting', 'Casual Outing', 'Formal Dinner',)."
+                    "⚠️ Please enter an occasion (e.g., 'Office Meeting', 'Casual Outing', 'Formal Dinner')."
                 )
                 return
             elif persona == "Ask Me Anything (Fashion Edition)" and not user_input:
                 st.warning("⚠️ Please enter a fashion-related question.")
                 return
             else:
-                result = analyze_outfit(
-                    image_path, detected_labels, persona, user_input
-                )
+                if persona == "Dress for an Occasion":
+                    prompt = f"Suggest an outfit for the occasion: {user_input}"
+                elif persona == "Ask Me Anything (Fashion Edition)":
+                    prompt = user_input
+
+                result = analyze_outfit(image_path, detected_labels, persona, prompt)
+
+                # Convert the result to speech in a separate thread
+                def generate_audio():
+                    nonlocal audio_path
+                    audio_path = text_to_speech(result)
+
+                # Start audio generation in a separate thread
+                audio_thread = Thread(target=generate_audio)
+                audio_thread.start()
+
+                # Wait for audio generation to complete
+                audio_thread.join()
+
                 st.success("✅ Analysis Complete!")
                 st.markdown("### AI Fashion Analysis 🎭")
                 st.write(result)
+                st.audio(audio_path, format="audio/mp3", start_time=0)
 
 
 def display_detected_outfit(image_path):
