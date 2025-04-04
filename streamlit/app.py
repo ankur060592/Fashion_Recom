@@ -1,3 +1,4 @@
+import base64
 import os
 import sys
 
@@ -9,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import time
 
 import cv2
+from gtts import gTTS
 
 from config import ASSEST_PATH, TEMP_PATH
 from run_script.fashion_analysis import analyze_outfit
@@ -73,43 +75,134 @@ def persona_buttons():
     if "persona" not in st.session_state:
         st.session_state.persona = None
 
-    col_btn1, col_btn2 = st.columns(2)
-    if col_btn1.button("🔥 Style Roast/Compliment"):
-        st.session_state.persona = "Style Roast/Compliment"
-    if col_btn2.button("✨ Complete the Look"):
-        st.session_state.persona = "Complete the Look"
-    if col_btn1.button("🎭 Dress the Occasion"):
-        st.session_state.persona = "Dress the Occasion"
-    if col_btn2.button("💬 Ask Me Anything"):
-        st.session_state.persona = "Ask Me Anything (Fashion Edition)"
+    # CSS for fixed-size buttons
+    st.markdown(
+        """
+        <style>
+        .fixed-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 150px; /* Fixed width for buttons */
+            height: 50px; /* Fixed height for buttons */
+            font-size: 16px;
+            border-radius: 8px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .fixed-button:hover {
+            background-color: #666;
+        }
+        .wider-button {
+            width: 300px; /* Wider width for the last row */
+        }
+        </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+    # Create columns for the buttons in three rows
+    col1, col2 = st.columns(2)  # First row with 2 columns
+    col3, col4 = st.columns(2)  # Second row with 2 columns
+    col5 = st.columns(1)[0]  # Third row with 1 wider column
+
+    # First row: Roast, Compliment
+    with col1:
+        if st.button(
+            "🔥 Roast Me",
+            key="Roast",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Roast"
+
+    with col2:
+        if st.button(
+            "💬 Compliment",
+            key="Compliment",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Compliment"
+
+    # Second row: Complete the Look, Dress for an Occasion
+    with col3:
+        if st.button(
+            "✨ Complete the Look",
+            key="Complete the Look",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Complete the Look"
+
+    with col4:
+        if st.button(
+            "👔 Dress me for an Occasion",
+            key="Dress the Occasion",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Dress the Occasion"
+
+    # Third row: Wider button for Ask Me Anything
+    with col5:
+        if st.button(
+            "❓ Ask Me Anything",
+            key="Ask Me Anything",
+            use_container_width=True,
+        ):
+            st.session_state.persona = "Ask Me Anything"
 
     user_input = ""
     if st.session_state.persona == "Dress the Occasion":
         user_input = st.text_input("🎭 Enter the Occasion:")
-    elif st.session_state.persona == "Ask Me Anything (Fashion Edition)":
+    elif st.session_state.persona == "Ask Me Anything":
         user_input = st.text_area("💬 Ask your fashion-related question:")
 
     return st.session_state.persona, user_input
 
 
+def get_image_base64(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
+
+
+def text_to_speech(text, lang="en", slow=False):
+    tts = gTTS(text=text, lang=lang, slow=slow)
+    audio_path = os.path.join(TEMP_PATH, "response.mp3")
+    tts.save(audio_path)
+    return audio_path
+
+
 def display_ai_analysis(image_path, detected_labels, persona, user_input):
+    prompt = ""
+
     if persona:
         with st.spinner("🧵 Analyzing Fashion... Please wait!"):
-            if persona == "Dress the Occasion" and not user_input:
-                st.warning(
-                    "⚠️ Please enter an occasion (e.g., 'Office Meeting', 'Casual Outing', 'Formal Dinner',)."
-                )
-                return
-            elif persona == "Ask Me Anything (Fashion Edition)" and not user_input:
-                st.warning("⚠️ Please enter a fashion-related question.")
+            if persona in ["Dress the Occasion", "Ask Me Anything"] and (
+                user_input is None or user_input == ""
+            ):
+                if persona == "Dress the Occasion":
+                    st.warning(
+                        "⚠️ Please enter an occasion (e.g., 'Office Meeting', 'Casual Outing', 'Formal Dinner')."
+                    )
+                elif persona == "Ask Me Anything":
+                    st.warning("⚠️ Please enter a fashion-related question.")
                 return
             else:
-                result = analyze_outfit(
-                    image_path, detected_labels, persona, user_input
-                )
+                if persona == "Dress the Occasion":
+                    prompt = f"Suggest an outfit for the occasion: {user_input}"
+                elif persona == "Ask Me Anything":
+                    prompt = user_input
+
+                result = analyze_outfit(image_path, detected_labels, persona, prompt)
+
+                # Convert the result to speech
+                audio_path = text_to_speech(result)
+
                 st.success("✅ Analysis Complete!")
                 st.markdown("### AI Fashion Analysis 🎭")
                 st.write(result)
+                st.audio(audio_path, format="audio/mp3", start_time=0)
 
 
 def display_detected_outfit(image_path):
@@ -151,7 +244,11 @@ def display_detected_outfit(image_path):
 
 
 def main():
-    st.set_page_config(layout="wide", page_title="TA Fashion Lens AI", page_icon="👠")
+    eye_lens_icon_path = os.path.join(ASSEST_PATH, "eye_lens_icon.png")
+    # Set page configuration with custom icon
+    st.set_page_config(
+        layout="wide", page_title="Fashion Lens", page_icon=eye_lens_icon_path
+    )
     ta_logo = Image.open(os.path.join(ASSEST_PATH, "tiger_logo.jpg"))
     google_next_logo = Image.open(os.path.join(ASSEST_PATH, "google_next_logo_2.png"))
     gcp_logo = Image.open(os.path.join(ASSEST_PATH, "gcp_logo.webp"))
@@ -221,11 +318,18 @@ def main():
         st.image(google_next_logo, use_container_width=True)
         st.header("Powered by")
         st.image([gcp_logo.resize((75, 75)), gemini_logo.resize((200, 75))])
-
+        # Display the custom icons with text
+    # Display the title with the custom icon
     st.markdown(
-        "<h1 style='text-align: center;'>👗 TA Fashion Lens AI</h1>",
+        f"""
+        <div style='display: flex; justify-content: center; align-items: center;'>
+            <img src="data:image/png;base64,{get_image_base64(eye_lens_icon_path)}" style='height: 40px; margin-right: 10px;'/>
+            <h1 style='margin: 0;'>f<span style='color: #FF69B4;'>A</span>sh<span style='color: #FF69B4;'>I</span>on lens</h1>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
+
     col1, col2 = st.columns([1, 1])
 
     if st.session_state.input_mode == "Upload Image" and st.session_state.image_path:
