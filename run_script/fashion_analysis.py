@@ -109,7 +109,7 @@ def analyze_outfit(image_path, detected_labels, persona, user_input=None):
             """
         else:
             return "Please enter an occasion to get recommendations."
-    elif persona == "Ask Me Anything (Fashion Edition)":
+    elif persona == "Ask Me Anything":
         if user_input:
             prompt = f"""
             {common_prompt} \n\n

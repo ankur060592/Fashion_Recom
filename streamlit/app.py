@@ -8,7 +8,6 @@ import streamlit as st
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import time
-from threading import Thread
 
 import cv2
 from gtts import gTTS
@@ -115,7 +114,6 @@ def persona_buttons():
         if st.button(
             "🔥 Roast Me",
             key="Roast",
-            help="Get a fashion roast!",
             use_container_width=True,
         ):
             st.session_state.persona = "Roast"
@@ -124,7 +122,6 @@ def persona_buttons():
         if st.button(
             "💬 Compliment",
             key="Compliment",
-            help="Receive a compliment!",
             use_container_width=True,
         ):
             st.session_state.persona = "Compliment"
@@ -134,7 +131,6 @@ def persona_buttons():
         if st.button(
             "✨ Complete the Look",
             key="Complete the Look",
-            help="Complete your outfit!",
             use_container_width=True,
         ):
             st.session_state.persona = "Complete the Look"
@@ -143,7 +139,6 @@ def persona_buttons():
         if st.button(
             "👔 Dress me for an Occasion",
             key="Dress the Occasion",
-            help="Dress for any occasion!",
             use_container_width=True,
         ):
             st.session_state.persona = "Dress the Occasion"
@@ -153,7 +148,6 @@ def persona_buttons():
         if st.button(
             "❓ Ask Me Anything",
             key="Ask Me Anything",
-            help="Ask anything fashion-related!",
             use_container_width=True,
         ):
             st.session_state.persona = "Ask Me Anything"
@@ -181,37 +175,29 @@ def text_to_speech(text, lang="en", slow=False):
 
 def display_ai_analysis(image_path, detected_labels, persona, user_input):
     prompt = ""
-    audio_path = None
 
     if persona:
         with st.spinner("🧵 Analyzing Fashion... Please wait!"):
-            if persona == "Dress for an Occasion" and not user_input:
-                st.warning(
-                    "⚠️ Please enter an occasion (e.g., 'Office Meeting', 'Casual Outing', 'Formal Dinner')."
-                )
-                return
-            elif persona == "Ask Me Anything (Fashion Edition)" and not user_input:
-                st.warning("⚠️ Please enter a fashion-related question.")
+            if persona in ["Dress the Occasion", "Ask Me Anything"] and (
+                user_input is None or user_input == ""
+            ):
+                if persona == "Dress the Occasion":
+                    st.warning(
+                        "⚠️ Please enter an occasion (e.g., 'Office Meeting', 'Casual Outing', 'Formal Dinner')."
+                    )
+                elif persona == "Ask Me Anything":
+                    st.warning("⚠️ Please enter a fashion-related question.")
                 return
             else:
-                if persona == "Dress for an Occasion":
+                if persona == "Dress the Occasion":
                     prompt = f"Suggest an outfit for the occasion: {user_input}"
-                elif persona == "Ask Me Anything (Fashion Edition)":
+                elif persona == "Ask Me Anything":
                     prompt = user_input
 
                 result = analyze_outfit(image_path, detected_labels, persona, prompt)
 
-                # Convert the result to speech in a separate thread
-                def generate_audio():
-                    nonlocal audio_path
-                    audio_path = text_to_speech(result)
-
-                # Start audio generation in a separate thread
-                audio_thread = Thread(target=generate_audio)
-                audio_thread.start()
-
-                # Wait for audio generation to complete
-                audio_thread.join()
+                # Convert the result to speech
+                audio_path = text_to_speech(result)
 
                 st.success("✅ Analysis Complete!")
                 st.markdown("### AI Fashion Analysis 🎭")
