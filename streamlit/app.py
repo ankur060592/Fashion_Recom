@@ -140,12 +140,16 @@ def persona_buttons():
         custom_button(cloth_icon_path, "Dress for an Occasion", "Dress the Occasion")
 
     with col5:
-        custom_button(speach2_icon_path, "Ask Me Anything", "Ask Me Anything")
+        custom_button(
+            speach2_icon_path,
+            "Ask Me Anything (Fashion Edition)",
+            "Ask Me Anything (Fashion Edition)",
+        )
 
     user_input = ""
     if st.session_state.persona == "Dress the Occasion":
         user_input = st.text_input("🎭 Enter the Occasion:")
-    elif st.session_state.persona == "Ask Me Anything":
+    elif st.session_state.persona == "Ask Me Anything (Fashion Edition)":
         user_input = st.text_area("💬 Ask your fashion-related question:")
 
     return st.session_state.persona, user_input
