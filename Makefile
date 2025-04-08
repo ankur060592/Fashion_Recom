@@ -1,44 +1,47 @@
-# Makefile for setting up the GenAI environment
+# Makefile for managing GenAI Fashion Recommendation Project
 
-# Define the environment name
-ENV_NAME = genai_env
-
-# Define the Python version
+# ========== CONFIG ==========
+ENV_NAME = genai_env_test
 PYTHON_VERSION = 3.10
-
-# Define the requirements file
 REQUIREMENTS_FILE = requirements.txt
+DEV_REQUIREMENTS_FILE = dev-requirements.txt
 
+# Docker config
+DOCKER_IMAGE = fashion-recom
+DOCKER_CONTAINER = fashion-recom-app
+
+# ========== ENV SETUP ==========
 .PHONY: setup install clean
 
-# Setup the environment
 setup:
-	@echo "Creating conda environment $(ENV_NAME) with Python $(PYTHON_VERSION)..."
+	@echo "Creating conda environment '$(ENV_NAME)' with Python $(PYTHON_VERSION)..."
 	conda create --name $(ENV_NAME) python=$(PYTHON_VERSION) -y
-	@echo "Activating conda environment $(ENV_NAME)..."
-	# Note: The following line will not work directly in Makefile due to shell limitations.
-	# You need to manually activate the environment in your terminal before proceeding.
-	# conda activate $(ENV_NAME)
-	@echo "Please activate the environment manually using: conda activate $(ENV_NAME)"
-	@echo "Installing dependencies from $(REQUIREMENTS_FILE)..."
-	# Install torch first to avoid conflicts
-	pip install torch==2.5.1+cu121 torchaudio==2.5.1+cu121 torchvision==0.20.1+cu121
-	pip install -r $(REQUIREMENTS_FILE)
-	@echo "Setup complete!"
+	@echo "Please activate environment with:"
+	@echo "  conda activate $(ENV_NAME)"
+	@echo "Next, run 'make install' to install project dependencies."
 
-# Install dependencies
 install:
-	@echo "Activating conda environment $(ENV_NAME)..."
-	# Note: The following line will not work directly in Makefile due to shell limitations.
-	# You need to manually activate the environment in your terminal before proceeding.
-	# conda activate $(ENV_NAME)
-	@echo "Please activate the environment manually using: conda activate $(ENV_NAME)"
 	@echo "Installing dependencies from $(REQUIREMENTS_FILE)..."
 	pip install -r $(REQUIREMENTS_FILE)
-	@echo "Installation complete!"
+	@echo "Installation complete."
 
-# Clean the environment
+install-dev:
+	@echo "Installing development dependencies from $(DEV_REQUIREMENTS_FILE)..."
+	pip install -r $(DEV_REQUIREMENTS_FILE)
+	@echo "Development installation complete."
+
 clean:
-	@echo "Removing conda environment $(ENV_NAME)..."
+	@echo "Removing conda environment '$(ENV_NAME)'..."
 	conda remove --name $(ENV_NAME) --all -y
-	@echo "Cleanup complete!"
+	@echo "Conda environment removed."
+
+# ========== CLEAN FILES ==========
+.PHONY: clear-cache
+
+clear-cache:
+	@echo "Clearing __pycache__, temp, and output files..."
+	find . -type d -name "__pycache__" -exec rm -r {} +
+	rm -rf temp/*
+	rm -rf output/*
+	@echo "All generated files cleared."
+
