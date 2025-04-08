@@ -1,7 +1,7 @@
 # Makefile for managing GenAI Fashion Recommendation Project
 
 # ========== CONFIG ==========
-ENV_NAME = genai_env_test
+ENV_NAME = genai_env
 PYTHON_VERSION = 3.10
 REQUIREMENTS_FILE = requirements.txt
 DEV_REQUIREMENTS_FILE = dev-requirements.txt
