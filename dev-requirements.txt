@@ -1,18 +1,18 @@
 # Install base (prod) requirements
 -r requirements.txt
 
-# Dev-only tools
-black
-flake8
-isort
-autoflake
-mypy-extensions
-pre_commit
-pyupgrade
-tokenize_rt
-toml
-tomli
-pathspec
-cfgv
-nodeenv
-virtualenv
+# pre-commit and code formatting
+black==25.1.0
+flake8==7.1.2
+isort==6.0.1
+autoflake==2.3.1
+pyupgrade==3.19.1
+tokenize_rt==6.1.0
+pre_commit==4.1.0
+
+# Optional but useful if running in CI/CD without conda
+virtualenv==20.29.3
+
+
+
+

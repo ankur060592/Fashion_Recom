@@ -1,14 +1,10 @@
 # Makefile for managing GenAI Fashion Recommendation Project
 
 # ========== CONFIG ==========
-ENV_NAME = genai_env_test
+ENV_NAME = genai_env
 PYTHON_VERSION = 3.10
 REQUIREMENTS_FILE = requirements.txt
 DEV_REQUIREMENTS_FILE = dev-requirements.txt
-
-# Docker config
-DOCKER_IMAGE = fashion-recom
-DOCKER_CONTAINER = fashion-recom-app
 
 # ========== ENV SETUP ==========
 .PHONY: setup install clean
