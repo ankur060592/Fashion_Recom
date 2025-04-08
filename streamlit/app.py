@@ -1,6 +1,9 @@
 import base64
 import os
 import sys
+import torch
+# or simply:
+torch.classes.__path__ = []
 
 from PIL import Image
 
@@ -298,7 +301,7 @@ def main():
     )
 
     with st.sidebar:
-        st.image(ta_logo.resize((250, 80)))
+        st.image(ta_logo, use_container_width=True)
         st.radio("Select Input Mode", ("Upload Image", "Live Webcam"), key="input_mode")
 
         if st.session_state.input_mode == "Upload Image":
