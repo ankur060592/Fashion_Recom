@@ -45,15 +45,3 @@ clear-cache:
 	rm -rf output/*
 	@echo "All generated files cleared."
 
-# ========== RUN APP CLEANLY ==========
-
-.PHONY: run-prod run-clean
-
-run-prod:
-	@echo "Starting Streamlit in production mode (no file watching)..."
-	STREAMLIT_WATCHER_TYPE=none streamlit run streamlit/app.py
-
-run-clean:
-	@echo "Starting Streamlit with warnings suppressed..."
-	STREAMLIT_WATCHER_TYPE=none PYTHONWARNINGS=ignore streamlit run streamlit/app.py
-
