@@ -18,8 +18,20 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
+# Create the required directories for output and temp files
+RUN mkdir -p /app/output/detected_items /app/temp
+
 # Copy the project files
 COPY . /app
+
+# Copy the environment file
+COPY .env /app/.env
+
+# Copy the model weights into the container
+COPY runs/detect/train7/weights/best.pt /app/runs/detect/train7/weights/best.pt
+
+# Copy the Streamlit assets into the container
+COPY streamlit/assets /app/streamlit/assets
 
 # Install Python dependencies
 RUN pip install --upgrade pip

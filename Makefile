@@ -6,8 +6,15 @@ PYTHON_VERSION = 3.10
 REQUIREMENTS_FILE = requirements.txt
 DEV_REQUIREMENTS_FILE = dev-requirements.txt
 
+DOCKER_IMAGE = fashion-recom
+DOCKER_CONTAINER = fashion-recom-app
+
 # ========== ENV SETUP ==========
 .PHONY: setup install clean
+
+fmt:
+	@echo "Formatting code with black..."
+	pre-commit run --all-files
 
 setup:
 	@echo "Creating conda environment '$(ENV_NAME)' with Python $(PYTHON_VERSION)..."
@@ -51,7 +58,7 @@ docker-build:
 
 docker-run:
 	@echo "Running Docker container '$(DOCKER_CONTAINER)'..."
-	docker run -p 8501:8501 --name $(DOCKER_CONTAINER) $(DOCKER_IMAGE)
+	docker run --env-file .env -v C:/Work/GenAI/Fashion_Recom/runs/detect/train7/weights/best.pt:/app/runs/detect/train7/weights/best.pt -p 8501:8501 --name $(DOCKER_CONTAINER) $(DOCKER_IMAGE)
 
 docker-stop:
 	@echo "Stopping and removing Docker container '$(DOCKER_CONTAINER)'..."
