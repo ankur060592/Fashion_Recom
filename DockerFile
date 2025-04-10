@@ -22,8 +22,6 @@ COPY . /app
 
 # Copy the environment file
 COPY .env /app/.env
-# Debugging step: Print environment variables
-RUN printenv | grep GOOGLE_API_KEY
 
 # Copy the model weights into the container
 COPY runs/detect/train7/weights/best.pt /app/runs/detect/train7/weights/best.pt
