@@ -3,14 +3,8 @@ __pycache__/
 *.py[cod]
 
 # Ignore local environments
-.env
 .venv/
-env/
 venv/
-
-# Ignore output & temp files
-output/
-temp/
 
 # Ignore system files
 .DS_Store
@@ -26,13 +20,6 @@ Thumbs.db
 # Ignore Streamlit cache
 .streamlit/
 
-# Ignore YOLO training runs and weights
-runs/
-*.pt
-
-# Ignore test assets
-streamlit/result_sample/
-streamlit/assets/
 
 # Ignore logs
 *.log
