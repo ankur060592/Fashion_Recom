@@ -57,6 +57,13 @@ Fashion_recom/
 
 3. **Install Dependencies**
 
+   #### Using Make
+   If you have Make installed on your system, you can use the following commands to setup:
+   ```bash
+   make setup
+   make install
+   ```
+   #### Using Terminal(manually)
    ```bash
    pip install -r requirements.txt
    ```
