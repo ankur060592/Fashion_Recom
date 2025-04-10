@@ -102,13 +102,15 @@ make docker-run
 #### Using Terminal
 
    ```bash
-docker build -t your-image-name .
-docker run -p 8501:8501 your-image-name
+      docker build -t your-image-name .
+      docker run -p 8501:8501 your-image-name
    ```
-#### If you get the API issue
+#### If you encounter API-related issues while running the Docker application
    ```bash
-docker run -p 8501:8501 -e GEMINI_API_KEY=your_api_key_here your-image-name
+   docker run -p 8501:8501 -e GEMINI_API_KEY=your_api_key_here your-image-name
    ```
+- Open the provided URL in your browser.
+
 
 ## For Developers
 
