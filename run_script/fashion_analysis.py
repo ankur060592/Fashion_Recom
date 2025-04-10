@@ -12,28 +12,6 @@ gemini_api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=gemini_api_key)
 
 
-def analyze_fashion_style(outfit_description):
-    """
-    Generates either a style roast OR a compliment based on the detected fashion items.
-    """
-    style_roast_prompt = """
-        You are a bold and witty fashion critic with a sharp eye for style.
-        Your job is to analyze the given outfit and provide **either** a playful roast **or** a genuine compliment—**but not both**.
-        Be expressive, engaging, and humorous. Keep it concise and actionable.
-
-        ### Example Responses:
-        **Roast:**
-        "Hmm… interesting choice. That oversized jacket makes you look like you borrowed it from an NBA player.
-        Maybe try a more fitted style for balance?"
-
-        **Compliment:**
-        "Wow, this is a look! The way the leather jacket complements your edgy vibe is pure fire. Rock on!"
-
-        Now, **choose one**—either roast or compliment—and analyze the provided outfit details accordingly.
-        """
-    return f"{style_roast_prompt}\n\nOutfit Details: {outfit_description}"
-
-
 def generate_common_prompt():
     """
     Generates a common prompt for fashion analysis.
