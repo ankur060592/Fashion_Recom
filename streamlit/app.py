@@ -12,61 +12,47 @@ from PIL import Image
 import streamlit as st
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-import time
 
 import cv2
 from gtts import gTTS
 
 from config import ASSEST_PATH, TEMP_PATH
 from run_script.fashion_analysis import analyze_outfit
-from run_script.yolo_inference import (
-    detect_fashion_items,
-    process_frame,
-    update_consecutive,
-)
+from run_script.yolo_inference import detect_fashion_items
 
 
-def start_webcam_mode():
-    """Handles live webcam video with YOLO detection and saves the best frame for AI analysis."""
-    st.session_state.best_frame_captured = (
-        False  # Reset flag for capturing the best frame
-    )
+def reset_webcam_capture():
+    st.session_state.best_frame_captured = False
+    st.session_state.image_path = None
+    st.session_state.detected_labels = []
+
+
+def start_webcam_mode(auto_capture=False):
+    """Display webcam feed and capture frame automatically or manually."""
     cap = cv2.VideoCapture(0)
-    consecutive_detection_count = 0
-    detection_wait_time = 5  # Number of seconds to wait for stable detection
-    start_time = time.time()
-
-    stframe = st.empty()  # For displaying the live webcam feed
+    stframe = st.empty()
 
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
 
-        # Process the frame with YOLO detection
-        detected, frame_with_boxes, detected_labels = process_frame(frame)
+        stframe.image(frame, channels="BGR", use_container_width=True)
 
-        # Display the live webcam feed (resize only for display purposes)
-        stframe.image(frame_with_boxes, channels="BGR", use_container_width=True)
+        # If auto capture OR user clicked 'Capture Photo'
+        if auto_capture or st.session_state.get("capture_now", False):
+            frame_with_boxes, detected_labels = detect_fashion_items(
+                frame, return_labels=True
+            )
 
-        # Update consecutive detection count
-        consecutive_detection_count = update_consecutive(
-            detected, consecutive_detection_count
-        )
-
-        # Check if detection is stable for a few seconds
-        if (time.time() - start_time >= detection_wait_time) and detected_labels:
-            # Save the original frame with boxes (not resized)
             best_frame_path = os.path.join(TEMP_PATH, "best_frame.jpg")
-            cv2.imwrite(
-                best_frame_path, frame_with_boxes
-            )  # Save frame_with_boxes instead of resized version
+            cv2.imwrite(best_frame_path, frame_with_boxes)
 
-            # Store the detected labels and best frame path
+            # Store results
             st.session_state.best_frame_captured = True
-            st.session_state.detected_labels = list(detected_labels)
             st.session_state.image_path = best_frame_path
-            # Clear the live webcam feed display
+            st.session_state.detected_labels = detected_labels
+            st.session_state.capture_now = False
             stframe.empty()
             break
 
@@ -228,13 +214,18 @@ def display_detected_outfit(image_path):
             st.session_state.detected_labels = detected_labels
             return detected_labels
     elif st.session_state.input_mode == "Live Webcam":
-        st.sidebar.empty()
-        if (
-            "best_frame_captured" not in st.session_state
-            or not st.session_state.best_frame_captured
-        ):
-            start_webcam_mode()
-        if st.session_state.best_frame_captured and "image_path" in st.session_state:
+        if not st.session_state.best_frame_captured:
+            auto = not st.session_state.get("auto_capture_done", False)
+            start_webcam_mode(auto_capture=auto)
+
+            # After auto-capture, mark it done
+            st.session_state.auto_capture_done = True
+
+            # Manual capture option
+            if st.button("📸 Capture Photo"):
+                st.session_state.capture_now = True
+                st.experimental_rerun()
+        else:
             st.image(
                 st.session_state.image_path,
                 caption="Detected Fashion Items",
@@ -245,6 +236,14 @@ def display_detected_outfit(image_path):
                 f"**👗 Detected Look:** {', '.join(st.session_state.detected_labels)}",
                 unsafe_allow_html=True,
             )
+
+            if st.button("🔁 Recapture"):
+                st.session_state.best_frame_captured = False
+                st.session_state.image_path = None
+                st.session_state.detected_labels = []
+                st.session_state.auto_capture_done = False  # Allow manual next time
+                st.experimental_rerun()
+
             return st.session_state.detected_labels
 
 
