@@ -57,6 +57,13 @@ Fashion_recom/
 
 3. **Install Dependencies**
 
+   #### Using Make
+   If you have Make installed on your system, you can use the following commands to setup:
+   ```bash
+   make setup
+   make install
+   ```
+   #### Using Terminal(manually)
    ```bash
    pip install -r requirements.txt
    ```
@@ -71,6 +78,39 @@ Fashion_recom/
 
    - Open the provided URL in your browser.
    - Upload an image to get fashion recommendations.
+
+## Docker Setup
+
+To build and run the Docker image, follow these steps:
+
+### Prerequisites
+
+- Ensure Docker is installed on your system. You can download and install Docker from [here](https://www.docker.com/get-started).
+- (Optional) If you have Make installed, you can use the Makefile to simplify the build and run process.
+
+### Building the Docker Image
+
+#### Using Make
+
+If you have Make installed on your system, you can use the following commands to build and run the Docker image:
+
+```bash
+make docker-build
+make docker-run
+ ```
+
+#### Using Terminal
+
+   ```bash
+      docker build -t your-image-name .
+      docker run -p 8501:8501 your-image-name
+   ```
+#### If you encounter API-related issues while running the Docker application
+   ```bash
+   docker run -p 8501:8501 -e GEMINI_API_KEY=your_api_key_here your-image-name
+   ```
+- Open the provided URL in your browser.
+
 
 ## For Developers
 
@@ -137,6 +177,4 @@ python run_script/yolo_train.py
 
 - Add a shopping element to "Complete the Look."
 - Enhance the interactivity of the live webcam feature.
-- Test speech conversation integration.
-- Ensure "Complete the Look" recommends new items, especially if the initial analysis is a roast.
-- Optimize AI prompts for more accurate recommendations.
+- Error Handling

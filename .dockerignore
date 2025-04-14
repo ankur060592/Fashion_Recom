@@ -1,0 +1,25 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+
+# Ignore local environments
+.venv/
+venv/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore Streamlit cache
+.streamlit/
+
+
+# Ignore logs
+*.log
